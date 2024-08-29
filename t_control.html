@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        input, button, select { margin: 10px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Control Panel</h1>
+    <div>
+        <input type="text" id="player1" placeholder="Player 1 Name">
+        <input type="text" id="player2" placeholder="Player 2 Name">
+        <button onclick="setNames()">Set Names</button>
+    </div>
+    <div>
+        <label>Player 1 Score:</label>
+        <select id="player1Points" onchange="setPoints('player1')">
+            <option value="0">0</option>
+            <option value="1">15</option>
+            <option value="2">30</option>
+            <option value="3">40</option>
+        </select>
+        <label>Player 2 Score:</label>
+        <select id="player2Points" onchange="setPoints('player2')">
+            <option value="0">0</option>
+            <option value="1">15</option>
+            <option value="2">30</option>
+            <option value="3">40</option>
+        </select>
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+    <div>
+        <button onclick="addGame('player1')">Player 1 Wins Game</button>
+        <button onclick="addGame('player2')">Player 2 Wins Game</button>
+    </div>
+    <div>
+        <button onclick="markSetWin('player1')">Player 1 Wins Set</button>
+        <button onclick="markSetWin('player2')">Player 2 Wins Set</button>
+    </div>
+    <div>
+        <button onclick="toggleGraphics()">Toggle Graphics</button>
+        <button onclick="toggleCurrentGame()">Toggle Current Game</button>
+        <button onclick="toggleTiebreak()">Toggle Tiebreak</button> <!-- Tiebreak toggle -->
+        <button onclick="toggleServer('player1')">Player 1 Serving</button> <!-- New server toggle -->
+        <button onclick="toggleServer('player2')">Player 2 Serving</button>
+        <button onclick="toggleServer('none')">No Server</button>
+        <button onclick="resetMatch()">Reset Match</button>
+    </div>
+
+    <script>
+        const initialState = {
+            player1: { points: 0, games: 0, sets: [], currentSetGames: 0, tiebreakPoints: 0 },
+            player2: { points: 0, games: 0, sets: [], currentSetGames: 0, tiebreakPoints: 0 },
+            tiebreak: false,
+            server: 'none' // New server state
+        };
+
+        function setNames() {
+            const player1 = document.getElementById('player1').value;
+            const player2 = document.getElementById('player2').value;
+            localStorage.setItem('player1Name', player1);
+            localStorage.setItem('player2Name', player2);
+            localStorage.setItem('gameState', JSON.stringify(initialState));
+        }
+
+        function setPoints(player) {
+            const points = document.getElementById(player + 'Points').value;
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            if (!gameState.tiebreak) {
+                gameState[player].points = parseInt(points);
+            } else {
+                gameState[player].tiebreakPoints = parseInt(points);
+            }
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        function updateScoreOptions() {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            const player1Points = document.getElementById('player1Points');
+            const player2Points = document.getElementById('player2Points');
+
+            player1Points.innerHTML = ''; // Clear existing options
+            player2Points.innerHTML = ''; // Clear existing options
+
+            if (gameState.tiebreak) {
+                // Tiebreak scoring options
+                [0, 1, 2, 3, 4, 5].forEach(score => {
+                    player1Points.add(new Option(score, score));
+                    player2Points.add(new Option(score, score));
+                });
+            } else {
+                // Regular scoring options
+                [0, 15, 30, 40].forEach((score, index) => {
+                    player1Points.add(new Option(score, index));
+                    player2Points.add(new Option(score, index));
+                });
+            }
+        }
+
+        function addGame(player) {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            gameState[player].games++;
+            gameState[player].currentSetGames++;
+            gameState.player1.points = gameState.player2.points = 0; // Reset points after winning a game
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        function markSetWin(player) {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            const opponent = player === 'player1' ? 'player2' : 'player1';
+
+            // Push the current set games to the sets array
+            gameState[player].sets.push(gameState[player].currentSetGames);
+            gameState[opponent].sets.push(gameState[opponent].currentSetGames);
+
+            // Reset only current set games, not the set history
+            gameState.player1.currentSetGames = 0;
+            gameState.player2.currentSetGames = 0;
+            gameState.player1.points = 0;
+            gameState.player2.points = 0;
+            gameState.player1.tiebreakPoints = 0;
+            gameState.player2.tiebreakPoints = 0;
+            gameState.tiebreak = false;
+            gameState.server = 'none'; // Reset server
+
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+            updateScoreOptions();
+        }
+
+        function toggleServer(player) {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            gameState.server = player;
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        function resetGame() {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            gameState.player1.points = gameState.player2.points = 0;
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        function toggleGraphics() {
+            const graphicsVisible = localStorage.getItem('graphicsVisible') === 'true';
+            localStorage.setItem('graphicsVisible', (!graphicsVisible).toString());
+        }
+
+        function toggleCurrentGame() {
+            const currentGameVisible = localStorage.getItem('currentGameVisible') === 'true';
+            localStorage.setItem('currentGameVisible', (!currentGameVisible).toString());
+        }
+
+        function toggleTiebreak() {
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            gameState.tiebreak = !gameState.tiebreak;
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+            updateScoreOptions(); // Update score options when tiebreak is toggled
+        }
+
+        function resetMatch() {
+            // Reset all data to initial state
+            localStorage.removeItem('player1Name');
+            localStorage.removeItem('player2Name');
+            localStorage.setItem('gameState', JSON.stringify(initialState));
+            localStorage.setItem('graphicsVisible', 'false');
+            localStorage.setItem('currentGameVisible', 'true'); // Reset to show current game by default
+            // Clear input fields for new names
+            document.getElementById('player1').value = '';
+            document.getElementById('player2').value = '';
+            updateScoreOptions(); // Reset score options
+            alert('Match reset! Ready for new players.');
+        }
+    </script>
+</body>
+</html>

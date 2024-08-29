@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Output Display</title>
+    <style>
+        body {
+            background-color: transparent; /* Transparent background */
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        #graphics {
+            position: fixed;
+            bottom: 40px; /* Position at the bottom */
+            left: 40px; /* Position to the left */
+            display: none;
+            border: 5px solid #50dcdc; /* Black border around the entire scoreboard */
+            padding: 1px; /* Padding inside the border */
+            background-color: rgb(40,40,40); /* Black background behind spacing */
+        }
+        table {
+            border-collapse: separate; /* Allow for spacing between columns */
+            border-spacing: 10px; /* Spacing between columns */
+        }
+        th, td {
+            padding: 5px;
+            font-size: 28px;
+            text-align: center;
+        }
+        th {
+            display: none; /* Hide header row */
+        }
+        td {
+            background-color: rgb(40,40,40); /* Default background */
+            color: white; /* Default text color */
+        }
+        .current-game {
+            background-color: white; /* Current game background */
+            color: black; /* Current game text color */
+        }
+        .winner {
+            color: #50dcdc; /* Set winner's score color */
+        }
+        #player1Name, #player2Name {
+            text-align: left; /* Left-align player names */
+        }
+    </style>
+</head>
+<body>
+    <div id="graphics">
+        <table>
+            <thead>
+                <tr id="headerRow">
+                    <th>Player</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="player1Row">
+                    <td id="player1Name"></td>
+                </tr>
+                <tr id="player2Row">
+                    <td id="player2Name"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            const player1Name = localStorage.getItem('player1Name');
+            const player2Name = localStorage.getItem('player2Name');
+            const gameState = JSON.parse(localStorage.getItem('gameState')) || initialState;
+            const graphicsVisible = localStorage.getItem('graphicsVisible') === 'true';
+            const currentGameVisible = localStorage.getItem('currentGameVisible') === 'true';
+
+            const server = gameState.server;
+
+            // Update player names with server indicator
+            document.getElementById('player1Name').textContent = player1Name + (server === 'player1' ? ' <' : '');
+            document.getElementById('player2Name').textContent = player2Name + (server === 'player2' ? ' <' : '');
+
+            // Update set scores and ensure the current game or tiebreak column is always the last column
+            updateSetScores(gameState, currentGameVisible);
+
+            document.getElementById('graphics').style.display = graphicsVisible ? 'block' : 'none';
+        }
+
+        function updateSetScores(gameState, currentGameVisible) {
+            const player1Row = document.getElementById('player1Row');
+            const player2Row = document.getElementById('player2Row');
+            const headerRow = document.getElementById('headerRow');
+
+            // Clear existing set score columns beyond player names
+            while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+            while (player1Row.children.length > 1) player1Row.removeChild(player1Row.lastChild);
+            while (player2Row.children.length > 1) player2Row.removeChild(player2Row.lastChild);
+
+            // Add columns for each completed set
+            gameState.player1.sets.forEach((_, index) => {
+                const setNumber = index + 1;
+
+                const th = document.createElement('th');
+                th.textContent = `Set ${setNumber}`;
+                headerRow.appendChild(th);
+
+                const player1SetScore = document.createElement('td');
+                player1SetScore.textContent = gameState.player1.sets[index];
+                if (gameState.player1.sets[index] > gameState.player2.sets[index]) {
+                    player1SetScore.classList.add('winner'); // Highlight winner's score
+                }
+                player1Row.appendChild(player1SetScore);
+
+                const player2SetScore = document.createElement('td');
+                player2SetScore.textContent = gameState.player2.sets[index];
+                if (gameState.player2.sets[index] > gameState.player1.sets[index]) {
+                    player2SetScore.classList.add('winner'); // Highlight winner's score
+                }
+                player2Row.appendChild(player2SetScore);
+            });
+
+            // Add the current set (in progress)
+            const thCurrentSet = document.createElement('th');
+            thCurrentSet.textContent = `Set ${gameState.player1.sets.length + 1}`;
+            headerRow.appendChild(thCurrentSet);
+
+            const player1CurrentSet = document.createElement('td');
+            player1CurrentSet.textContent = gameState.player1.currentSetGames;
+            player1Row.appendChild(player1CurrentSet);
+
+            const player2CurrentSet = document.createElement('td');
+            player2CurrentSet.textContent = gameState.player2.currentSetGames;
+            player2Row.appendChild(player2CurrentSet);
+
+            // Toggle between current game and tiebreak column
+            if (gameState.tiebreak) {
+                addTiebreakColumn(gameState);
+            } else if (currentGameVisible) {
+                addCurrentGameColumn(gameState);
+            }
+        }
+
+        function addCurrentGameColumn(gameState) {
+            const headerRow = document.getElementById('headerRow');
+            const player1Row = document.getElementById('player1Row');
+            const player2Row = document.getElementById('player2Row');
+
+            const thCurrentGame = document.createElement('th');
+            thCurrentGame.textContent = 'Current Game';
+            thCurrentGame.id = 'currentGameHeader';
+            headerRow.appendChild(thCurrentGame);
+
+            const player1CurrentGame = document.createElement('td');
+            player1CurrentGame.id = 'player1CurrentGame';
+            player1CurrentGame.textContent = tennisScores[gameState.player1.points];
+            player1CurrentGame.classList.add('current-game');
+            player1Row.appendChild(player1CurrentGame);
+
+            const player2CurrentGame = document.createElement('td');
+            player2CurrentGame.id = 'player2CurrentGame';
+            player2CurrentGame.textContent = tennisScores[gameState.player2.points];
+            player2CurrentGame.classList.add('current-game');
+            player2Row.appendChild(player2CurrentGame);
+        }
+
+        function addTiebreakColumn(gameState) {
+            const headerRow = document.getElementById('headerRow');
+            const player1Row = document.getElementById('player1Row');
+            const player2Row = document.getElementById('player2Row');
+
+            const thTiebreak = document.createElement('th');
+            thTiebreak.textContent = 'Tiebreak';
+            thTiebreak.id = 'tiebreakHeader';
+            headerRow.appendChild(thTiebreak);
+
+            const player1Tiebreak = document.createElement('td');
+            player1Tiebreak.id = 'player1Tiebreak';
+            player1Tiebreak.textContent = gameState.player1.tiebreakPoints;
+            player1Tiebreak.classList.add('current-game');
+            player1Row.appendChild(player1Tiebreak);
+
+            const player2Tiebreak = document.createElement('td');
+            player2Tiebreak.id = 'player2Tiebreak';
+            player2Tiebreak.textContent = gameState.player2.tiebreakPoints;
+            player2Tiebreak.classList.add('current-game');
+            player2Row.appendChild(player2Tiebreak);
+        }
+
+        const tennisScores = [0, 15, 30, 40];
+        const initialState = {
+            player1: { points: 0, games: 0, sets: [], currentSetGames: 0, tiebreakPoints: 0 },
+            player2: { points: 0, games: 0, sets: [], currentSetGames: 0, tiebreakPoints: 0 },
+            tiebreak: false,
+            server: 'none' // New server state
+        };
+
+        setInterval(updateDisplay, 1000); // Update display every second
+    </script>
+</body>
+</html>
