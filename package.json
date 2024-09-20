@@ -1,7 +1,8 @@
 {
-  "name": "onyx-mussa-portfolio",
+  "name": "onyxmussa",
   "version": "0.1.0",
   "private": true,
+<<<<<<< HEAD
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -25,13 +26,27 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
+=======
+  "homepage": "https://www.onyxmussa.com",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "export": "next export",
+    "deploy": "npm run build && npm run export && gh-pages -d out",
+    "postexport": "echo www.onyxmussa.com > ./out/CNAME"
+>>>>>>> 401c61dfc08989fd1398085d48bb1b2573804b11
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwind-merge": "^2.1.0"
   },
+<<<<<<< HEAD
   "browserslist": {
     "production": [
       ">0.2%",
@@ -46,5 +61,15 @@
   },
   "devDependencies": {
     "gh-pages": "^6.1.1"
+=======
+  "devDependencies": {
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "^14.2.13",
+    "gh-pages": "^6.1.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "tailwindcss-animate": "^1.0.7"
+>>>>>>> 401c61dfc08989fd1398085d48bb1b2573804b11
   }
 }
