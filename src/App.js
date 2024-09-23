@@ -135,7 +135,7 @@ export default function App() {
               Contact
             </Typography>
             <Typography variant="body1" gutterBottom sx={{ color: 'primary.main' }}>
-              Email: onyx.mussa@example.com
+              Email: onyxfilms@gmail.com
             </Typography>
             <Grid container justifyContent="center" spacing={2} sx={{ mt: 2 }}>
               <Grid item>
