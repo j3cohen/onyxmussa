@@ -51,8 +51,6 @@ export default function App() {
         </AppBar>
 
         {/* Hero Video Section */}
-
-        {/* Hero Video Section */}
         <Box sx={{
           marginTop: '64px', // Offset for the fixed AppBar
           height: '100vh', // Always fills the screen height
@@ -78,7 +76,7 @@ export default function App() {
             </Box>
           )}
           <iframe
-            src="https://www.youtube.com/embed/moAfqFo3f00?autoplay=1&mute=1&controls=0&loop=1&playlist=moAfqFo3f00"
+            src="https://www.youtube.com/embed/fDuKGoFt7LA?autoplay=1&mute=1&controls=0&loop=1&playlist=fDuKGoFt7LA"
             title="Hero Video"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -94,6 +92,31 @@ export default function App() {
               transition: 'opacity 0.5s ease-in-out',
             }}
           />
+        </Box>
+
+        {/* Featured Work: Drone FPV */}
+        <Box sx={{ position: 'relative', width: '100%', mt: 4 }}>
+          <Container maxWidth="md">
+            <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 4, color: 'primary.main' }}>
+              Featured Work: Drone FPV Real Estate
+            </Typography>
+            <Box sx={{ position: 'relative', paddingTop: '56.25%', overflow: 'hidden' }}>
+              <iframe
+                src="https://www.youtube.com/embed/Cba8F7xzrB0" // YouTube Short for Drone FPV
+                title="Drone FPV"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </Box>
+          </Container>
         </Box>
 
         {/* Portfolio Section */}
