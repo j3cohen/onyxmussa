@@ -24,7 +24,7 @@ export default function App() {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVideoLoaded(true), 2000);
+    const timer = setTimeout(() => setVideoLoaded(true), 2000); // Simulate loading time
     return () => clearTimeout(timer);
   }, []);
 
@@ -39,6 +39,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {/* AppBar */}
         <AppBar position="fixed" color="transparent" elevation={0}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -48,16 +49,28 @@ export default function App() {
             <Button color="inherit" onClick={() => scrollToSection('contact')}>Contact</Button>
           </Toolbar>
         </AppBar>
-        <Box sx={{ height: '100vh', position: 'relative', overflow: 'hidden' }}>
+
+        {/* Hero Video Section */}
+
+        {/* Hero Video Section */}
+        <Box sx={{
+          marginTop: '64px', // Offset for the fixed AppBar
+          height: '100vh', // Always fills the screen height
+          position: 'relative',
+          overflowY: 'auto', // Ensure scrollability on mobile
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
           {!videoLoaded && (
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              right: 0, 
-              bottom: 0, 
-              display: 'flex', 
-              alignItems: 'center', 
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'background.default'
             }}>
@@ -72,16 +85,18 @@ export default function App() {
             allowFullScreen
             style={{
               position: 'absolute',
-              top: '-60px',
+              top: 0,
               left: 0,
               width: '100%',
-              height: 'calc(100% + 120px)',
+              height: '100%',
               border: 'none',
               opacity: videoLoaded ? 1 : 0,
               transition: 'opacity 0.5s ease-in-out',
             }}
           />
         </Box>
+
+        {/* Portfolio Section */}
         <Container maxWidth="lg" sx={{ mt: 4, position: 'relative', zIndex: 1 }}>
           <Typography id="portfolio" variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 4, color: 'primary.main', pt: 8 }}>
             Portfolio
@@ -113,6 +128,8 @@ export default function App() {
               </Grid>
             ))}
           </Grid>
+
+          {/* Contact Section */}
           <Box id="contact" sx={{ py: 8, textAlign: 'center' }}>
             <Typography variant="h4" gutterBottom sx={{ color: 'primary.main' }}>
               Contact
