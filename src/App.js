@@ -1,6 +1,8 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Typography, Grid, CircularProgress, AppBar, Toolbar, Button } from '@mui/material';
+import { portfolioItems } from './portfolioData';
 
 const theme = createTheme({
   palette: {
@@ -11,47 +13,7 @@ const theme = createTheme({
   typography: { fontFamily: '"Helvetica Neue", Arial, sans-serif' },
 });
 
-const portfolioItems = [
-  { title: 'LIGHTING', videoUrl: 'https://www.youtube.com/embed/moAfqFo3f00' },
-  { title: 'ASSISTANT CAMERA AND DRONE', videoUrl: 'https://www.youtube.com/embed/ULjGbYWbJDU' },
-  { title: 'CAMERA', videoUrl: 'https://www.instagram.com/p/CzMeq4rPI6Z/embed' },
-  { title: 'DRONE', videoUrl: 'https://www.youtube.com/embed/HeZck91SBIY' },
-  { title: 'GENERAL PRODUCTION 1', videoUrl: 'https://www.youtube.com/embed/sc8DXDWRKac' },
-  { title: 'GENERAL PRODUCTION 2', videoUrl: 'https://www.youtube.com/embed/hklSInDi5Rc' },
-
-  // Production Coordinator
-  { title: 'PRODUCTION COORDINATOR - DEBS HOUSE SEASON 2', videoUrl: 'https://www.youtube.com/embed/GevNlbu-c4g' },
-
-  // Production Assistant
-  { title: 'PRODUCTION ASSISTANT - PAID IN FULL BBC DOCUSERIES', videoUrl: 'https://www.youtube.com/embed/o64mQaHlStk' },
-  { title: 'PRODUCTION ASSISTANT - NEWMAN’S PIZZA COMMERCIAL', videoUrl: 'https://www.tiktok.com/embed/7283951484981710126' },
-  { title: 'PRODUCTION ASSISTANT - RETAIL ME NOT COMMERCIAL', videoUrl: 'https://www.youtube.com/embed/OQKaBTMbTXQ' },
-  { title: 'PRODUCTION ASSISTANT - STAPLE 21 MERCER GRAND OPENING COMMERCIAL', videoUrl: 'https://www.instagram.com/reel/DJb9jdSRkMi/embed' },
-  { title: 'PRODUCTION ASSISTANT - JERSEY SHORE FAMILY VACATION SEASON 7', videoUrl: 'https://www.youtube.com/embed/6UW4Ydnmvv4' },
-  { title: 'PRODUCTION ASSISTANT - GOOGLE PIXEL LOLA BROOKE COMMERCIAL', videoUrl: 'https://www.ebony.com/video/google-pixel-represents-lola-brooke/' },
-  { title: 'PRODUCTION ASSISTANT - TIAA AND WYCLEF JEAN COMMERCIAL', videoUrl: 'https://www.tiktok.com/embed/7324750512732081451' },
-
-  // Swing
-  { title: 'SWING - ARYNA SABALENKA TAKES NEW YORK CITY (OFF DAY)', videoUrl: 'https://www.youtube.com/embed/aD6ul6SNVl8' },
-  { title: 'SWING - NEW YORK CITY MARATHON SPONSORED BY NEW BALANCE', videoUrl: 'https://www.tiktok.com/embed/7433574655476124961' },
-  { title: 'SWING - KC CHIEFS COMMERCIAL W/ CHRISTOPHER MELONI (START @4 MINUTES)', videoUrl: 'https://www.youtube.com/embed/_027x-xqqdU' },
-  { title: 'SWING - O\'SHAQUIE FOSTER WITH MARK KREIGEL INTERVIEW FOR TOP RANK', videoUrl: 'https://www.youtube.com/embed/6z2EUFLr7HU' },
-  { title: 'SWING - SHAKUR STEVENSON WITH MARK KREIGEL INTERVIEW FOR TOP RANK', videoUrl: 'https://www.instagram.com/reel/C9F_Ck4u2co/embed' },
-  { title: 'SWING - BRUCE CARRINGTON WITH MARK KREIGEL INTERVIEW FOR TOP RANK', videoUrl: 'https://www.instagram.com/reel/DAYwE9zuxiX/embed' },
-  { title: 'SWING - MIKAELA MAYER VS SANDY RYAN WITH MARK KREIGEL INTERVIEW FOR TOP RANK', videoUrl: 'https://www.instagram.com/reel/DAcHcJ4S2ro/embed' },
-
-  // Scenic
-  { title: 'SCENIC - 2024 LIGHTSCAPE BOTANICAL GARDENS', videoUrl: 'https://www.youtube.com/embed/9UGiypX9SSQ' },
-
-  // Sky Cam Utility
-  { title: 'SKY CAM UTILITY - ESPN NAVY VS NOTRE DAME GAME', videoUrl: 'https://www.youtube.com/embed/F_O6FdBzH90' },
-  { title: 'SKY CAM UTILITY - ESPN GIANTS VS JETS GAME', videoUrl: 'https://www.youtube.com/embed/Adtwip2ykKc' },
-
-  // BTS
-  { title: 'BTS - X MEN MANSION BY AIRBNB', videoUrl: 'https://www.youtube.com/embed/RUPPRDQo7vo' },
-];
-
-// ⬇️ Add this helper just above your component
+// Replaces your raw iframe so non-embeddable URLs still render nicely
 function Embed({ src, title }) {
   const canEmbed = /youtube\.com\/embed|instagram\.com\/.+\/embed|tiktok\.com\/embed/i.test(src);
 
@@ -68,7 +30,7 @@ function Embed({ src, title }) {
     );
   }
 
-  // Fallback: black 16:9 box with “Click to view on [domain]”
+  // Fallback: black 16:9 box with "Click to view on [domain]"
   let domain = 'source';
   try {
     const u = new URL(src);
@@ -102,12 +64,80 @@ function Embed({ src, title }) {
   );
 }
 
+// Converts normal watch/share URLs into iframe-ready embed URLs
+function toEmbedUrl(url) {
+  if (!url) return url;
+  let u;
+  try { u = new URL(url.trim()); } catch { return url; }
+
+  const host = u.hostname.toLowerCase();
+
+  // --- YouTube ---
+  if (host.includes('youtube.com')) {
+    const v = u.searchParams.get('v');
+    if (v) return `https://www.youtube.com/embed/${v}`;
+    const parts = u.pathname.split('/').filter(Boolean);
+    const id = parts[parts.length - 1];
+    if (id && parts[0] !== 'embed') return `https://www.youtube.com/embed/${id}`;
+    return url;
+  }
+  if (host.includes('youtu.be')) {
+    const id = u.pathname.split('/').filter(Boolean)[0];
+    if (id) return `https://www.youtube.com/embed/${id}`;
+    return url;
+  }
+
+  // --- TikTok ---
+  if (host.includes('tiktok.com')) {
+    const parts = u.pathname.split('/').filter(Boolean);
+    const ix = parts.findIndex((p) => p === 'video');
+    if (ix !== -1 && parts[ix + 1]) {
+      const id = parts[ix + 1];
+      return `https://www.tiktok.com/embed/v2/${id}`;
+    }
+    return url;
+  }
+
+  // --- Instagram ---
+  if (host.includes('instagram.com')) {
+    const parts = u.pathname.split('/').filter(Boolean);
+    const type = parts[0];
+    const code = parts[1];
+    if ((type === 'reel' || type === 'p') && code) {
+      return `https://www.instagram.com/${type}/${code}/embed`;
+    }
+    return url;
+  }
+
+  // --- Vimeo ---
+  if (host.includes('vimeo.com')) {
+    const id = u.pathname.split('/').filter(Boolean)[0];
+    if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+    return url;
+  }
+
+  // Others (e.g., ebony.com) stay as-is; <Embed/> will show the black box CTA
+  return url;
+}
+
 export default function App() {
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setVideoLoaded(true), 2000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Load portfolio from local data file (already sorted by updated_at desc)
+  useEffect(() => {
+    const mapped = portfolioItems.map((row) => ({
+      id: row.id,
+      title: row.title,
+      videoUrl: toEmbedUrl(row.video_url),
+      role: row.role,
+    }));
+    setItems(mapped);
   }, []);
 
   const scrollToSection = (sectionId) => {
@@ -186,15 +216,15 @@ export default function App() {
           <Typography id="portfolio" variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 4, color: 'primary.main', pt: 8 }}>
             PORTFOLIO
           </Typography>
+
           <Grid container spacing={4}>
-            {portfolioItems.map((item, index) => (
-              <Grid item xs={12} md={6} key={index}>
+            {items.map((item) => (
+              <Grid item xs={12} md={6} key={item.id || item.title}>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
                     {item.title}
                   </Typography>
                   <Box sx={{ position: 'relative', paddingTop: '56.25%', overflow: 'hidden' }}>
-                    {/* ⬇️ use Embed instead of raw iframe */}
                     <Embed src={item.videoUrl} title={item.title} />
                   </Box>
                 </Box>
